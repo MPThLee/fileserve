@@ -1,0 +1,6 @@
+# Files
+files/
+# Urls
+urls/
+
+!/**/.gitkeep
