@@ -49,11 +49,22 @@ impl<'a, 'r> FromRequest<'a, 'r> for ApiRequestHeader {
             return Outcome::Failure((Status::BadRequest, ()));
         }
 
+        let reqtype = reqtype[0];
+
         if filename.len() != 1 {
-            filename = vec![""];
+            if reqtype == "fileupload" {
+                return Outcome::Failure((Status::BadRequest, ()));
+            } else {
+                filename = vec![""];
+            }
         }
+
         if urldata.len() != 1 {
-            urldata = vec![""];
+            if reqtype == "urlshortener" {
+                return Outcome::Failure((Status::BadRequest, ()));
+            } else {
+                urldata = vec![""];
+            }
         }
 
         let key = token[0];
@@ -63,7 +74,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for ApiRequestHeader {
 
         return Outcome::Success(ApiRequestHeader {
             token: key.to_string(),
-            reqtype: reqtype[0].to_string(),
+            reqtype: reqtype.to_string(),
             filename: filename[0].to_string(),
             urldata: urldata[0].to_string()
         });
