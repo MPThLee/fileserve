@@ -75,12 +75,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for ApiRequestHeader {
 pub(crate) fn api_index(ct: &ContentType, data: Data, req: ApiRequestHeader) -> Result<content::Json<String>, Failure> {
     if req.reqtype == "fileupload" {
         file_upload(ct, data, req)
-    } else if req.reqtype == "urlshortner" {
-        url_shortner(data, req)
+    } else if req.reqtype == "urlshortener" {
+        url_shortener(data, req)
     } else { return Err(Failure(Status::BadRequest)) }
 }
 
-fn url_shortner(_data: Data, req: ApiRequestHeader) -> Result<content::Json<String>, Failure> {
+fn url_shortener(_data: Data, req: ApiRequestHeader) -> Result<content::Json<String>, Failure> {
     let id = id::ItemID::new(8, true);
     let filename = format!("content/urls/{id}", id = id);
     let url = format!("{host}/r/{id}", host = &*HOSTNAME, id = id);
@@ -88,7 +88,7 @@ fn url_shortner(_data: Data, req: ApiRequestHeader) -> Result<content::Json<Stri
     // Write the paste out to the file and return the URL.
     let mut file = File::create(Path::new(&filename)).ok().unwrap();
     file.write_all(req.urldata.as_bytes()).ok();
-    Ok(content::Json(format!("{} 'success': true, 'link': '{url}' {}", "{", "}", url = url)))
+    Ok(content::Json(format!("{{ 'success': true, 'link': '{url}' }}", url = url)))
 }
 
 fn file_upload(content_type: &ContentType,data: Data, req: ApiRequestHeader) -> Result<content::Json<String>, Failure> {
@@ -131,5 +131,5 @@ fn file_upload(content_type: &ContentType,data: Data, req: ApiRequestHeader) -> 
         || Failure(Status::InternalServerError)
     )?;
 
-    return Ok(content::Json(format!("{} 'success': true, 'link': '{url}' {}", "{", "}", url = url)))
+    return Ok(content::Json(format!("{{ 'success': true, 'link': '{url}' }}", url = url)))
 }
