@@ -8,7 +8,7 @@ modify `.env` file.
 You need to install rustup and rust-nightly.
 ```bash
 $ rustup override set nightly
-$ cargo run --release.
+$ cargo run --release
 ```
 it will host on `http://localhost:8000`
 

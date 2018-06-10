@@ -25,6 +25,15 @@ pub struct ApiRequestHeader {
 lazy_static! {
     static ref HOSTNAME: String = env::var("HOSTNAME").unwrap_or("http://localhost:8000".to_string());
     static ref TOKEN_KEY: String = env::var("TOKEN_KEY").unwrap_or("valid_api_key".to_string());
+    static ref SIZE_LIMIT: u64 = {
+        use std::u64;
+        let env = env::var("SIZE_LIMIT").unwrap_or("33554432".to_string());
+        let num = env.parse::<u64>().unwrap_or(u64::MAX);
+        if num == 0u64 {
+            return u64::MAX
+        }
+        num
+    };
 }
 
 /// Returns true if `key` is a valid API key string.
@@ -119,7 +128,7 @@ fn file_upload(content_type: &ContentType,data: Data, req: ApiRequestHeader) -> 
     let mut file = File::create(Path::new(&filename)).ok().unwrap();
     let mut content: Vec<u8> = Vec::new();
 
-    match Multipart::with_body(data.open(), boundary).save().temp() {
+    match Multipart::with_body(data.open(), boundary).save().size_limit(Some(*SIZE_LIMIT)).temp() {
         Full(entries) => {
             let r = entries.fields.get(&Arc::new(String::from("filedata"))) // HashMap
                     .ok_or_else(
